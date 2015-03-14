@@ -8,16 +8,24 @@
 
 ##    6 activities 
 
+##    Request removal of RMySQL - Just in case. This can interfere with the sqldf library.
+##    Ensure sqldf library is loaded 
+
+detach(package:RMySQL)
+
+library(sqldf)
+
 ##  The data is is 16 col chunks - and its the first 6 pieces of data required.
   
-##  First job - merge people file, activity file and results file  
+##  First job - merge people file, activity file and results file  for 1st group - column bind
   
 	atest = read.fwf("X_test.txt",widths=c(16, 16, 16, 16, 16, 16))
-  apeople = read.fwf("subject_test.txt",widths=c(4))
-  
+    apeople = read.fwf("subject_test.txt",widths=c(4))
 	atask = read.fwf("y_test.txt",widths=c(1))
   
-  adesc <- atask
+    adesc <- atask
+  
+##  Add a field with a full description of the activity - based on the code
   
 	## Activity   
 	##  1 WALKING
@@ -36,12 +44,15 @@
   
 	collateda <- cbind(apeople, adesc, atask, atest)
   
-	btrain = read.fwf("X_train.txt",widths=c(16, 16, 16, 16, 16, 16))
+##  Second job - repeat merge people file, activity file and results file  for 2nd group - column bind
   
+	btrain = read.fwf("X_train.txt",widths=c(16, 16, 16, 16, 16, 16))
 	bpeople = read.fwf("subject_train.txt",widths=c(4))
 	btask = read.fwf("y_train.txt",widths=c(1))
   
-  bdesc <- btask
+    bdesc <- btask
+  
+##  Add a field with a full description of the activity - based on the code  
   
 	btask[btask == 1] <- "Walking"
 	btask[btask == 2] <- "Walking_Upstairs"
@@ -51,8 +62,10 @@
 	btask[btask == 6] <- "Laying"
 	
 	collatedb <- cbind(bpeople, bdesc, btask, btrain)
+	
+##  Merge the 2 groups of people - row bind	- and name the columns
   
-  collated <- rbind(collateda, collatedb)
+    collated <- rbind(collateda, collatedb)
   
 	colnames(collated) <- c("Participant_ID",
 	                        "Activity_Code",
@@ -80,6 +93,8 @@
                    group by Participant_ID, Activity_Code
                    order by Participant_ID, Activity_Code")
   
+##  Output the selected data - with a timestamp on the first line to identify when it was created
+  
 	write.table(Sys.time(), "Tidy_Data.txt", row.names=FALSE, col.names = FALSE, append=FALSE)
-  write.table(ResData, "Tidy_Data.txt", row.names=FALSE, col.names = TRUE, append=TRUE)
+    write.table(ResData, "Tidy_Data.txt", row.names=FALSE, col.names = TRUE, append=TRUE)
 	
